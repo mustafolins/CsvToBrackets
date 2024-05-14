@@ -2,37 +2,67 @@
 
 namespace CsvToBrackets.Services;
 
-public class CsvToBracketsService
+public class CsvToBracketsService(ILogger<CsvToBracketsService> logger)
 {
-    public static string CsvToBrackets(string csv)
+    public ILogger<CsvToBracketsService> Logger { get; } = logger;
+
+    public string ToBrackets(string csv)
     {
         var lines = csv.Split("\n");
         var brackets = new StringBuilder();
         // Get the first line of the CSV
         var header = lines[0];
         var columns = GetColumns(header.AsEnumerable());
-
-        // Loop through the columns
-        foreach (var column in columns)
-        {
-            brackets.Append($"[{column}]");
-        }
-        brackets.AppendLine();
-
-        // Loop through other lines in the CSV
-        foreach (var line in lines.Skip(1))
-        {
-            columns = GetColumns(line.AsEnumerable());
-            foreach (var column in columns)
-            {
-                brackets.Append($"[{column}]");
-            }
-            brackets.AppendLine();
-        }
+        // Process the header
+        var headerCount = ProcessHeader(brackets, columns);
+        // Process the body
+        ProcessBody(lines.Skip(1), brackets, headerCount);
+        // Return the brackets
         return brackets.ToString();
     }
 
-    public static IEnumerable<string> GetColumns(IEnumerable<char> enumerable)
+    public int ProcessHeader(StringBuilder brackets, IEnumerable<string> columns)
+    {
+        int headerCount = 0;
+
+        // Loop through the header columns
+        foreach (var column in columns)
+        {
+            brackets.Append(column);
+            headerCount++;
+        }
+        brackets.AppendLine();
+
+        return headerCount;
+    }
+
+    public void ProcessBody(IEnumerable<string> lines, StringBuilder brackets, int headerCount)
+    {
+        // Loop through other lines in the CSV
+        foreach (var line in lines)
+        {
+            var columnCount = 0;
+            var columns = GetColumns(line.AsEnumerable());
+            foreach (var column in columns)
+            {
+                brackets.Append(column);
+                columnCount++;
+            }
+            // Check if the number of columns in the CSV matches the header
+            if (columnCount != headerCount)
+            {
+                throw new FormatException("Number of columns in the CSV does not match the header");
+            }
+            brackets.AppendLine();
+        }
+    }
+
+    /// <summary>
+    /// Gets the columns from a CSV line.
+    /// </summary>
+    /// <param name="enumerable">The line as an <see cref="IEnumerable{char}"/>.</param>
+    /// <returns>An <see cref="IEnumerable{string}"/> of the parsed columns.</returns>
+    public IEnumerable<string> GetColumns(IEnumerable<char> enumerable)
     {
         var column = new StringBuilder();
         var inQuotes = false;
@@ -43,7 +73,16 @@ public class CsvToBracketsService
             {
                 inQuotes = !inQuotes;
 
-                // Don't add the quote to the current column
+                // If inQuotes is true then we're at the start of a quoted column
+                if (inQuotes)
+                {
+                    column.Append('[');
+                }
+                // If inQuotes is false then we're at the end of a quoted column
+                else
+                {
+                    column.Append(']');
+                }
                 continue;
             }
 
