@@ -27,18 +27,38 @@ public class CsvToBracketsService(ILogger<CsvToBracketsService> logger)
     {
         Logger.LogInformation("Processing CSV header");
 
-        int headerCount = 0;
-
-        // Loop through the header columns
-        foreach (var column in columns)
-        {
-            brackets.Append(column);
-            headerCount++;
-        }
+        // Add the header columns to the brackets
+        var headerCount = AddColumns(brackets, columns);
         brackets.AppendLine();
 
         Logger.LogInformation("Header count: {headerCount}", headerCount);
         return headerCount;
+    }
+
+    public int AddColumns(StringBuilder brackets, IEnumerable<string> columns)
+    {
+        int count = 0;
+
+        // Loop through the header columns
+        bool isFirst = true;
+        foreach (var column in columns)
+        {
+            // If this is the first column, don't add a space
+            if (isFirst)
+            {
+                isFirst = false;
+            }
+            else
+            {
+                brackets.Append(" ");
+            }
+            // Append the column to the brackets
+            brackets.Append(column);
+            count++;
+        }
+
+        // Return the number of columns added
+        return count;
     }
 
     /// <summary>
@@ -54,22 +74,20 @@ public class CsvToBracketsService(ILogger<CsvToBracketsService> logger)
         // Loop through other lines in the CSV
         foreach (var line in lines)
         {
-            var columnCount = 0;
             var columns = GetColumns(line.AsEnumerable());
-            foreach (var column in columns)
+            var columnCount = AddColumns(brackets, columns);
+            if (columnCount > 0)
             {
-                brackets.Append(column);
-                columnCount++;
+                // Check if the number of columns in the CSV matches the header
+                if (columnCount != 0 && columnCount != headerCount)
+                {
+                    Logger.LogCritical("Number of columns in the CSV does not match the header");
+                    // Throw a FormatException if the number of columns in the CSV does not match the header
+                    // this can happen if the CSV is malformed or misaligned
+                    throw new FormatException("Number of columns in the CSV does not match the header");
+                }
+                brackets.AppendLine();
             }
-            // Check if the number of columns in the CSV matches the header
-            if (columnCount != headerCount)
-            {
-                Logger.LogCritical("Number of columns in the CSV does not match the header");
-                // Throw a FormatException if the number of columns in the CSV does not match the header
-                // this can happen if the CSV is malformed or misaligned
-                throw new FormatException("Number of columns in the CSV does not match the header");
-            }
-            brackets.AppendLine();
         }
     }
 
@@ -84,39 +102,37 @@ public class CsvToBracketsService(ILogger<CsvToBracketsService> logger)
 
         var column = new StringBuilder();
         var inQuotes = false;
-        foreach (var c in enumerable)
+        foreach (var ch in enumerable)
         {
             // If we encounter a quote, toggle the inQuotes flag
-            if (c == '"')
+            if (ch == '"')
             {
                 inQuotes = !inQuotes;
-
-                // If inQuotes is true then we're at the start of a quoted column
-                if (inQuotes)
-                {
-                    column.Append('[');
-                }
-                // If inQuotes is false then we're at the end of a quoted column
-                else
-                {
-                    column.Append(']');
-                }
                 continue;
             }
 
             // If we encounter a comma and we're not in quotes, yield the current column
-            if (c == ',' && !inQuotes)
+            if (ch == ',' && !inQuotes)
             {
-                yield return column.ToString();
+                // Yield the column and add brackets around it
+                yield return $"[{column}]";
                 // Reset the column
                 column = new();
             }
             // Otherwise, add the character to the current column
             else
             {
-                column.Append(c);
+                column.Append(ch);
             }
         }
-        yield return column.ToString();
+        // Yield the column and add brackets around it if it's not empty
+        if (column.Length > 0)
+        {
+            yield return $"[{column}]"; 
+        }
+        else
+        {
+            yield break;
+        }
     }
 }

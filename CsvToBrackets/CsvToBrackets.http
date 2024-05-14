@@ -1,0 +1,26 @@
+@CsvToBrackets_HostAddress = https://localhost:32772
+
+// Given Input CSV Data
+POST {{CsvToBrackets_HostAddress}}/CsvToBrackets
+Content-Type: application/json
+Accept: text/plain
+
+"\"Patient Name\",\"SSN\",\"Age\",\"Phone Number\",\"Status\"\n\"Prescott, Zeke\",\"542-51-6641\",21,\"801-555-2134\",\"Opratory=2,PCP=1\"\n\"Goldstein, Bucky\",\"635-45-1254\",42,\"435-555-1541\",\"Opratory=1,PCP=1\"\n\"Vox, Bono\",\"414-45-1475\",51,\"801-555-2100\",\"Opratory=3,PCP=2\""
+
+###
+
+// Example Request
+POST {{CsvToBrackets_HostAddress}}/CsvToBrackets
+Content-Type: application/json
+Accept: text/plain
+
+"\"Test, One\",Dude,\"Testing\"\nOne,Three,\"Test\""
+###
+
+// Example Bad Request
+POST {{CsvToBrackets_HostAddress}}/CsvToBrackets
+Content-Type: application/json
+Accept: text/plain
+
+"1,2,3\n1,2"
+###

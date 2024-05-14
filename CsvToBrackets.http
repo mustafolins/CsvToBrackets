@@ -1,6 +1,0 @@
-@CsvToBrackets_HostAddress = http://localhost:5099
-
-GET {{CsvToBrackets_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###
