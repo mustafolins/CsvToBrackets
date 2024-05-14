@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace CsvToBracketsTests;
 
-public  class CsvToBracketsControllerTests
+public class CsvToBracketsControllerTests
 {
     public CsvToBracketsController Controller { get; set; }
 
@@ -61,5 +61,22 @@ public  class CsvToBracketsControllerTests
         // Assert
         Assert.That(result, Is.Not.Null);
         Assert.That(result.StatusCode, Is.EqualTo(400));
+    }
+
+    [Test]
+    public void Post_WithException_ReturnsInternalServerError()
+    {
+        // Arrange
+        var csv = "Name,Age\nJohn,30\n";
+        var bracketServiceMock = new Mock<ICsvToBracketsService>();
+        bracketServiceMock.Setup(s => s.ToBrackets(It.IsAny<string>())).Throws(new Exception("Test Exception"));
+        Controller = new(bracketServiceMock.Object, new Mock<ILogger<CsvToBracketsController>>().Object);
+
+        // Act
+        var result = Controller.Post(csv) as ObjectResult;
+
+        // Assert
+        Assert.That(result, Is.Not.Null);
+        Assert.That(result.StatusCode, Is.EqualTo(500));
     }
 }

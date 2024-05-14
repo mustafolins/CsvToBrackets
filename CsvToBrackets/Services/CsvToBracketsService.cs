@@ -2,7 +2,7 @@
 
 namespace CsvToBrackets.Services;
 
-public class CsvToBracketsService(ILogger<CsvToBracketsService> logger)
+public class CsvToBracketsService(ILogger<CsvToBracketsService> logger) : ICsvToBracketsService
 {
     public ILogger<CsvToBracketsService> Logger { get; } = logger;
 
@@ -128,7 +128,7 @@ public class CsvToBracketsService(ILogger<CsvToBracketsService> logger)
         // Yield the column and add brackets around it if it's not empty
         if (column.Length > 0)
         {
-            yield return $"[{column}]"; 
+            yield return $"[{column}]";
         }
         else
         {

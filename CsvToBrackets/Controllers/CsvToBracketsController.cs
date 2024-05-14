@@ -6,10 +6,10 @@ namespace CsvToBrackets.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-public class CsvToBracketsController(CsvToBracketsService csvToBracketsService, ILogger<CsvToBracketsController> logger) : ControllerBase
+public class CsvToBracketsController(ICsvToBracketsService csvToBracketsService, ILogger<CsvToBracketsController> logger) : ControllerBase
 {
     public ILogger<CsvToBracketsController> Logger { get; } = logger;
-    public CsvToBracketsService BracketService { get; } = csvToBracketsService;
+    public ICsvToBracketsService BracketService { get; } = csvToBracketsService;
 
     /// <summary>
     /// Converts the given CSV to brackets.
