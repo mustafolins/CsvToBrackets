@@ -68,6 +68,7 @@ public class CsvToBracketsControllerTests
     {
         // Arrange
         var csv = "Name,Age\nJohn,30\n";
+        // Mock bracket service to throw an exception
         var bracketServiceMock = new Mock<ICsvToBracketsService>();
         bracketServiceMock.Setup(s => s.ToBrackets(It.IsAny<string>())).Throws(new Exception("Test Exception"));
         Controller = new(bracketServiceMock.Object, new Mock<ILogger<CsvToBracketsController>>().Object);
