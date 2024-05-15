@@ -6,11 +6,16 @@ public class CsvToBracketsService(ILogger<CsvToBracketsService> logger) : ICsvTo
 {
     public ILogger<CsvToBracketsService> Logger { get; } = logger;
 
+    /// <summary>
+    /// Converts the given <paramref name="csv"/> to brackets.
+    /// </summary>
+    /// <param name="csv">The comma-seperated values.</param>
+    /// <returns>The <paramref name="csv"/> converted to brackets.</returns>
     public string ToBrackets(string csv)
     {
         Logger.LogInformation("Converting CSV to brackets");
 
-        var lines = csv.Split("\n");
+        var lines = csv.Replace("\r", "").Split("\n");
         var brackets = new StringBuilder();
         // Get the first line of the CSV
         var header = lines[0];
@@ -23,6 +28,12 @@ public class CsvToBracketsService(ILogger<CsvToBracketsService> logger) : ICsvTo
         return brackets.ToString();
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="brackets"></param>
+    /// <param name="columns"></param>
+    /// <returns></returns>
     public int ProcessHeader(StringBuilder brackets, IEnumerable<string> columns)
     {
         Logger.LogInformation("Processing CSV header");
@@ -35,6 +46,12 @@ public class CsvToBracketsService(ILogger<CsvToBracketsService> logger) : ICsvTo
         return headerCount;
     }
 
+    /// <summary>
+    /// Adds <paramref name="columns"/> to the <paramref name="brackets"/>.
+    /// </summary>
+    /// <param name="brackets">The <see cref="StringBuilder"/> to add <paramref name="columns"/> to.</param>
+    /// <param name="columns">The columns to add to <paramref name="brackets"/>.</param>
+    /// <returns>The added columns count.</returns>
     public int AddColumns(StringBuilder brackets, IEnumerable<string> columns)
     {
         int count = 0;
@@ -50,7 +67,7 @@ public class CsvToBracketsService(ILogger<CsvToBracketsService> logger) : ICsvTo
             }
             else
             {
-                brackets.Append(" ");
+                brackets.Append(' ');
             }
             // Append the column to the brackets
             brackets.Append(column);

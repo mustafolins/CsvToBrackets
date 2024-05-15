@@ -3,15 +3,23 @@
 
  Production Swagger Url: https://csvtobrackets.azurewebsites.net/swagger/index.html
 
- Usage:
+ ## Usage
 
+Request:
  ```http
+
 POST https://csvtobrackets.azurewebsites.net/CsvToBrackets
 Content-Type: application/json
 Accept: text/plain
 
 "\"Test, One\",Dude,\"Testing\"\nOne,Three,\"Test\""
  ```
+
+Response
+```
+[Test, One] [Dude] [Testing]
+[One] [Three] [Test]
+```
 
  Docker repository: https://hub.docker.com/repository/docker/mustafolins/csv-to-brackets/general
 
